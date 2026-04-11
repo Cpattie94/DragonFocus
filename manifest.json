@@ -1,0 +1,18 @@
+{
+  "name": "DragonFocus",
+  "short_name": "DragonFocus",
+  "description": "Your mythical productivity companion",
+  "start_url": "./DragonFocus.html",
+  "display": "standalone",
+  "background_color": "#080c14",
+  "theme_color": "#38bdf8",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "baby-dragon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,754 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DragonFocus — Your Mythical Productivity Companion</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#38bdf8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; frame-ancestors 'none'; worker-src 'self'"/>
+<meta name="referrer" content="no-referrer"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{--accent:#38bdf8;--accent-muted:rgba(56,189,248,.18)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',sans-serif;background:#080c14;color:#dde8ff;min-height:100vh;overflow-x:hidden}
+  .stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--d) ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.07}50%{opacity:.55}}
+  .app{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:20px 16px 40px}
+  .header{text-align:center;margin-bottom:24px}
+  .header h1{font-family:'Cinzel',serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,#60c8ff,#38bdf8,#7dd3fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;margin-bottom:4px}
+  .header p{font-size:12px;color:#4a7fa5;letter-spacing:2px;text-transform:uppercase}
+  .main-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.main-layout{grid-template-columns:1fr}}
+  .panel{background:rgba(255,255,255,0.03);border:1px solid rgba(100,180,255,0.1);border-radius:20px;padding:20px}
+  .panel-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .panel-title::before{content:'';display:inline-block;width:4px;height:4px;background:var(--accent);border-radius:50%}
+  .dragon-panel{grid-column:1 / -1;display:flex;flex-direction:column;align-items:center;gap:16px;padding:28px}
+  .dragon-name-display{font-family:'Cinzel',serif;font-size:22px;font-weight:600;color:#e0f2ff;text-align:center}
+  .dragon-name-display span{font-size:11px;font-weight:400;letter-spacing:2px;display:block;color:#4a7fa5;text-transform:uppercase;margin-top:2px}
+  .dragon-container{position:relative;width:340px;height:300px;cursor:pointer}
+  .dragon-glow{position:absolute;top:55%;left:50%;transform:translate(-50%,-50%);width:220px;height:160px;border-radius:50%;opacity:.18;animation:glow-pulse 3.5s ease-in-out infinite}
+  @keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.12}50%{transform:translate(-50%,-50%) scale(1.18);opacity:.28}}
+  #dragon-svg{width:340px;height:300px;animation:dragon-float 3.5s ease-in-out infinite;filter:drop-shadow(0 8px 24px rgba(56,189,248,0.4))}
+  @keyframes dragon-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  .dragon-container:hover #dragon-svg{animation:dragon-happy .35s ease-in-out 3,dragon-float 3.5s ease-in-out infinite 1.1s}
+  @keyframes dragon-happy{0%,100%{transform:scale(1) rotate(0deg)}33%{transform:scale(1.05) rotate(-3deg)}66%{transform:scale(1.05) rotate(3deg)}}
+  .mood-bar-wrap{width:100%;max-width:240px}
+  .mood-label{display:flex;justify-content:space-between;font-size:12px;color:#4a7fa5;margin-bottom:6px}
+  .mood-bar{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden}
+  .mood-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent));transition:width .8s ease}
+  .speech-bubble{position:relative;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.25);border-radius:18px;padding:12px 18px;max-width:320px;text-align:center;font-size:14px;color:#dde8ff;line-height:1.5;min-height:48px;display:flex;align-items:center;justify-content:center;transition:opacity .3s}
+  .speech-bubble::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);border-left:10px solid transparent;border-right:10px solid transparent;border-top:10px solid rgba(56,189,248,0.25)}
+  .timer-display{font-family:'Cinzel',serif;font-size:48px;font-weight:700;text-align:center;letter-spacing:4px;color:#e0f2ff;line-height:1;margin:12px 0}
+  .timer-display.active{color:var(--accent);animation:timer-pulse 1s ease-in-out infinite}
+  @keyframes timer-pulse{0%,100%{text-shadow:0 0 20px rgba(56,189,248,.3)}50%{text-shadow:0 0 40px rgba(56,189,248,.9)}}
+  .timer-presets{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+  .preset-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(100,180,255,0.12);border-radius:20px;padding:5px 12px;font-size:12px;color:#4a7fa5;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
+  .preset-btn:hover,.preset-btn.active{background:rgba(56,189,248,.18);border-color:#38bdf8;color:#38bdf8}
+  .custom-time{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:12px}
+  .custom-time input{width:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(100,180,255,0.14);border-radius:10px;padding:5px 8px;font-size:14px;color:#dde8ff;font-family:'Nunito',sans-serif;text-align:center}
+  .custom-time input:focus{outline:none;border-color:#38bdf8}
+  .custom-time label{font-size:13px;color:#4a7fa5}
+  .timer-controls{display:flex;gap:10px;justify-content:center}
+  .btn{padding:10px 24px;border-radius:50px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;transition:all .2s}
+  .btn-primary{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:white;box-shadow:0 4px 20px rgba(56,189,248,.35)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(56,189,248,.55)}
+  .btn-secondary{background:rgba(255,255,255,0.05);color:#4a7fa5;border:1px solid rgba(100,180,255,0.12)}
+  .btn-secondary:hover{background:rgba(255,255,255,0.1);color:#dde8ff}
+  .sep{height:1px;background:rgba(100,180,255,0.07);margin:12px 0}
+  .section-label{font-size:11px;letter-spacing:1px;color:#4a7fa5;text-transform:uppercase;margin-bottom:8px;font-weight:600}
+  .mode-tabs{display:flex;background:rgba(255,255,255,0.04);border-radius:12px;padding:4px;margin-bottom:12px}
+  .mode-tab{flex:1;padding:6px;border-radius:9px;border:none;background:transparent;color:#4a7fa5;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+  .mode-tab.active{background:rgba(56,189,248,.2);color:#38bdf8}
+  .status-strip{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+  .status-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+  .pill-idle{background:rgba(74,127,165,.18);color:#4a7fa5}
+  .pill-active{background:rgba(56,189,248,.18);color:#38bdf8}
+  .pill-done{background:rgba(52,211,153,.13);color:#34d399}
+  .progress-ring-wrap{position:relative;width:44px;height:44px;flex-shrink:0}
+  .progress-ring-wrap svg{transform:rotate(-90deg)}
+  .progress-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:700;color:#38bdf8}
+  .timer-meta{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:4px}
+  .sessions-count{font-size:12px;color:#4a7fa5}
+  .sessions-count strong{color:#38bdf8}
+  .reminder-card{background:rgba(255,255,255,0.03);border:1px solid rgba(100,180,255,0.08);border-radius:14px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+  .reminder-card.new-reminder{animation:reminder-pop .5s cubic-bezier(.34,1.56,.64,1);background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.25)}
+  @keyframes reminder-pop{0%{transform:scale(.85) translateX(-16px);opacity:0}100%{transform:scale(1) translateX(0);opacity:1}}
+  .reminder-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+  .reminder-text{font-size:12px;line-height:1.5;color:#a8c8e8}
+  .reminder-text strong{color:#dde8ff;font-weight:700;display:block;margin-bottom:1px}
+  .goal-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(100,180,255,0.12);border-radius:12px;padding:9px 12px;font-size:13px;color:#dde8ff;font-family:'Nunito',sans-serif;margin-bottom:8px;resize:none;height:64px}
+  .goal-input:focus{outline:none;border-color:#38bdf8}
+  .goal-item{display:flex;align-items:center;gap:10px;padding:7px 11px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:5px;font-size:13px;cursor:pointer;transition:all .2s;user-select:none}
+  .goal-item:hover{background:rgba(255,255,255,0.07)}
+  .goal-item.done{opacity:.4;text-decoration:line-through;color:#4a7fa5}
+  .goal-check{width:17px;height:17px;border-radius:50%;border:2px solid rgba(56,189,248,.35);flex-shrink:0;transition:all .2s;position:relative}
+  .goal-item.done .goal-check{background:#38bdf8;border-color:#38bdf8}
+  .goal-item.done .goal-check::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;color:white}
+  .btn-sm{padding:8px 14px;border-radius:11px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;background:rgba(56,189,248,.2);color:#38bdf8;transition:all .2s}
+  .btn-sm:hover{background:rgba(56,189,248,.4)}
+
+  .name-input-row{display:flex;gap:8px}
+  .name-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(100,180,255,0.12);border-radius:11px;padding:9px 13px;font-size:13px;color:#dde8ff;font-family:'Nunito',sans-serif}
+  .name-input:focus{outline:none;border-color:#38bdf8}
+  .toast{position:fixed;bottom:24px;right:20px;background:rgba(6,18,36,.97);border:1px solid rgba(56,189,248,.28);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;max-width:300px;z-index:1000;transform:translateX(380px);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+  .toast.show{transform:translateX(0)}
+  .toast-icon{font-size:20px}
+  .toast-text{font-size:12px;line-height:1.4}
+  .toast-text strong{display:block;color:#38bdf8;margin-bottom:2px;font-size:13px}
+  .eye-blue{background:#1d7fc4}.eye-gold{background:#d97706}.eye-green{background:#059669}
+  @keyframes wing-l{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-7deg)}}
+  @keyframes wing-r{0%,100%{transform:rotate(0deg)}50%{transform:rotate(7deg)}}
+  @keyframes tail-curl{0%,100%{transform:rotate(0deg)}40%{transform:rotate(10deg)}70%{transform:rotate(-6deg)}}
+  @keyframes eye-blink{0%,82%,100%{transform:scaleY(1)}88%{transform:scaleY(0.06)}}
+  /* ── Setup overlay ────────────────────────────────────────── */
+  #setup-overlay{position:fixed;inset:0;z-index:500;background:rgba(4,8,18,.97);display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px}
+  @keyframes setup-fade-out{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.97)}}
+  #setup-overlay.closing{animation:setup-fade-out .4s ease forwards}
+  #setup-card{background:rgba(255,255,255,.03);border:1px solid rgba(100,180,255,.14);border-radius:24px;padding:36px 32px;max-width:520px;width:100%;display:flex;flex-direction:column;gap:24px}
+  .setup-header{text-align:center}
+  .setup-header h2{font-family:'Cinzel',serif;font-size:20px;font-weight:700;background:linear-gradient(135deg,#60c8ff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1.5px;margin-bottom:6px}
+  .setup-header p{font-size:13px;color:#4a7fa5}
+  .setup-dragon-preview img{width:130px;animation:dragon-float 4s ease-in-out infinite;filter:drop-shadow(0 6px 18px var(--accent));transition:filter .3s}
+  .setup-field label{display:block;font-size:11px;letter-spacing:1px;color:#4a7fa5;text-transform:uppercase;font-weight:600;margin-bottom:7px}
+  .personality-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:480px){.personality-grid{grid-template-columns:1fr}}
+  .personality-card{border:2px solid rgba(100,180,255,.12);border-radius:14px;padding:12px 14px;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.03)}
+  .personality-card:hover{border-color:var(--accent);background:var(--accent-muted)}
+  .personality-card.active{border-color:var(--accent);background:var(--accent-muted)}
+  .pc-icon{font-size:22px;margin-bottom:4px}
+  .pc-name{font-family:'Cinzel',serif;font-size:12px;color:var(--accent);letter-spacing:.5px}
+  .pc-desc{font-size:11px;color:#4a7fa5;margin-top:3px;line-height:1.4}
+  .accent-swatches{display:flex;gap:10px;flex-wrap:wrap}
+  .accent-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;position:relative}
+  .accent-swatch.active{border-color:white;transform:scale(1.18)}
+  .accent-swatch.active::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:white;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+  .eye-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;position:relative}
+  .eye-swatch.active{border-color:white;transform:scale(1.18)}
+  .eye-swatch.active::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;color:white;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+  .eye-glow{position:absolute;left:50%;top:37%;transform:translateX(-50%);width:72px;height:28px;border-radius:50%;opacity:.55;mix-blend-mode:screen;pointer-events:none;transition:background .3s,box-shadow .3s;filter:blur(6px)}
+  .setup-dragon-preview{text-align:center;position:relative;display:inline-block;width:100%}
+  .setup-eye-glow{position:absolute;left:50%;top:36%;transform:translateX(-50%);width:38px;height:15px;border-radius:50%;opacity:.6;mix-blend-mode:screen;pointer-events:none;transition:background .3s;filter:blur(4px)}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- First-time setup overlay -->
+<div id="setup-overlay">
+  <div id="setup-card">
+    <div class="setup-header">
+      <h2>Welcome to DragonFocus</h2>
+      <p>Let's get your dragon ready before we begin.</p>
+    </div>
+    <div class="setup-dragon-preview">
+      <img src="baby-dragon.png" alt="Your dragon"/>
+      <div class="setup-eye-glow" id="setup-eye-glow" style="background:#60a5fa"></div>
+    </div>
+    <div class="setup-field">
+      <label>Your Name</label>
+      <input class="name-input" type="text" id="setup-user-name" placeholder="e.g. Connor" maxlength="20"/>
+    </div>
+    <div class="setup-field">
+      <label>Dragon's Name</label>
+      <input class="name-input" type="text" id="setup-dragon-name" placeholder="e.g. Blaze" maxlength="16"/>
+    </div>
+    <div class="setup-field">
+      <label>Dragon Personality</label>
+      <div class="personality-grid">
+        <div class="personality-card active" data-personality="guardian" onclick="selectPersonality(this)">
+          <div class="pc-icon">🛡️</div>
+          <div class="pc-name">Guardian</div>
+          <div class="pc-desc">Warm, protective &amp; motivational</div>
+        </div>
+        <div class="personality-card" data-personality="scholar" onclick="selectPersonality(this)">
+          <div class="pc-icon">📚</div>
+          <div class="pc-name">Scholar</div>
+          <div class="pc-desc">Thoughtful, curious &amp; learning-focused</div>
+        </div>
+        <div class="personality-card" data-personality="trickster" onclick="selectPersonality(this)">
+          <div class="pc-icon">😏</div>
+          <div class="pc-name">Trickster</div>
+          <div class="pc-desc">Playful, cheeky &amp; a little mischievous</div>
+        </div>
+        <div class="personality-card" data-personality="sage" onclick="selectPersonality(this)">
+          <div class="pc-icon">🌿</div>
+          <div class="pc-name">Sage</div>
+          <div class="pc-desc">Calm, philosophical &amp; mindful</div>
+        </div>
+      </div>
+    </div>
+    <div class="setup-field">
+      <label>Accent Colour</label>
+      <div class="accent-swatches">
+        <div class="accent-swatch active" data-accent="#38bdf8" data-muted="rgba(56,189,248,.18)" style="background:#38bdf8" title="Azure" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#a855f7" data-muted="rgba(168,85,247,.18)" style="background:#a855f7" title="Amethyst" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#10b981" data-muted="rgba(16,185,129,.18)" style="background:#10b981" title="Jade" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#f43f5e" data-muted="rgba(244,63,94,.18)" style="background:#f43f5e" title="Crimson" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#f59e0b" data-muted="rgba(245,158,11,.18)" style="background:#f59e0b" title="Ember" onclick="selectAccent(this)"></div>
+      </div>
+    </div>
+    <div class="setup-field">
+      <label>Eye Colour</label>
+      <div class="accent-swatches">
+        <div class="eye-swatch active" data-eye="#60a5fa" style="background:#60a5fa" title="Sky Blue" onclick="selectEyeColor(this)"></div>
+        <div class="eye-swatch" data-eye="#fbbf24" style="background:#fbbf24" title="Amber Gold" onclick="selectEyeColor(this)"></div>
+        <div class="eye-swatch" data-eye="#34d399" style="background:#34d399" title="Emerald" onclick="selectEyeColor(this)"></div>
+        <div class="eye-swatch" data-eye="#fb7185" style="background:#fb7185" title="Rose" onclick="selectEyeColor(this)"></div>
+        <div class="eye-swatch" data-eye="#c084fc" style="background:#c084fc" title="Violet" onclick="selectEyeColor(this)"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="completeSetup()">Begin Quest ✦</button>
+  </div>
+</div>
+
+<div class="app" id="app-main">
+  <div class="header">
+    <h1>DragonFocus</h1>
+    <p>Your mythical productivity companion</p>
+  </div>
+
+  <div class="main-layout">
+
+    <!-- Dragon display -->
+    <div class="panel dragon-panel">
+      <div class="speech-bubble" id="speech">Tap me to wake up! Ready to keep you focused!</div>
+      <div class="dragon-container" onclick="petDragon()">
+        <div class="dragon-glow" id="dragon-glow" style="background:#38bdf8"></div>
+        <div class="eye-glow" id="eye-glow" style="background:#60a5fa"></div>
+        <svg id="dragon-svg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="bRad" cx="40%" cy="32%" r="65%"><stop offset="0%" stop-color="var(--dl,#7dd3fc)"/><stop offset="55%" stop-color="var(--dm,#2196d4)"/><stop offset="100%" stop-color="var(--dd,#0c4a7a)"/></radialGradient>
+            <radialGradient id="blRad" cx="45%" cy="30%" r="60%"><stop offset="0%" stop-color="#f0faff"/><stop offset="100%" stop-color="#c8e8f8"/></radialGradient>
+            <radialGradient id="wLRad" cx="70%" cy="25%" r="75%"><stop offset="0%" stop-color="var(--wl,#7dd3fc)"/><stop offset="60%" stop-color="var(--wm,#1e90d4)"/><stop offset="100%" stop-color="var(--wd,#0a3a6a)"/></radialGradient>
+            <radialGradient id="wRRad" cx="30%" cy="25%" r="75%"><stop offset="0%" stop-color="var(--wl,#7dd3fc)"/><stop offset="60%" stop-color="var(--wm,#1e90d4)"/><stop offset="100%" stop-color="var(--wd,#0a3a6a)"/></radialGradient>
+            <radialGradient id="eyeWh" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#e8f8ff"/><stop offset="100%" stop-color="#c0dff0"/></radialGradient>
+            <radialGradient id="irisR" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="var(--el,#7dd3fc)"/><stop offset="100%" stop-color="var(--ed,#1d4ed8)"/></radialGradient>
+            <radialGradient id="mthR" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#ff8fa3"/><stop offset="100%" stop-color="#e05070"/></radialGradient>
+            <radialGradient id="caveGlow" cx="50%" cy="55%" r="60%"><stop offset="0%" stop-color="#5c3800" stop-opacity="0.75"/><stop offset="100%" stop-color="#0d0800" stop-opacity="0"/></radialGradient>
+          </defs>
+          <!-- Cave background -->
+          <rect width="340" height="300" fill="#100d06"/>
+          <!-- Left cave wall -->
+          <path d="M0 0 L0 300 L78 300 C70 284 63 268 57 252 C51 236 47 220 49 205 C51 190 57 175 64 160 C70 144 72 129 69 114 C65 99 57 84 51 69 C45 54 41 38 46 20 L52 0Z" fill="#231a0d"/>
+          <!-- Right cave wall -->
+          <path d="M340 0 L340 300 L262 300 C270 284 277 268 283 252 C289 236 293 220 291 205 C289 190 283 175 276 160 C270 144 268 129 271 114 C275 99 283 84 289 69 C295 54 299 38 294 20 L288 0Z" fill="#231a0d"/>
+          <!-- Cave ceiling arch -->
+          <path d="M0 0 L340 0 L340 58 C314 44 292 34 272 29 C252 24 236 31 218 26 C200 21 182 28 170 23 C158 18 140 25 122 26 C104 27 86 22 66 29 C46 36 22 47 0 58Z" fill="#231a0d"/>
+          <!-- Stone protrusions left -->
+          <path d="M0 88 C14 83 24 91 20 104 C16 117 5 114 0 109Z" fill="#1a1309" opacity="0.7"/>
+          <path d="M0 168 C16 163 26 172 21 185 C16 198 4 195 0 190Z" fill="#1a1309" opacity="0.6"/>
+          <!-- Stone protrusions right -->
+          <path d="M340 95 C326 90 316 98 321 111 C326 124 337 121 340 116Z" fill="#1a1309" opacity="0.7"/>
+          <path d="M340 175 C324 170 314 179 319 192 C324 205 336 202 340 197Z" fill="#1a1309" opacity="0.6"/>
+          <!-- Stalactites -->
+          <polygon points="93,0 106,0 99,42" fill="#1c1409" opacity="0.92"/>
+          <polygon points="143,0 154,0 148,52" fill="#1c1409" opacity="0.92"/>
+          <polygon points="184,0 197,0 190,57" fill="#1c1409" opacity="0.88"/>
+          <polygon points="223,0 234,0 228,46" fill="#1c1409" opacity="0.92"/>
+          <polygon points="254,0 265,0 259,37" fill="#1c1409" opacity="0.92"/>
+          <!-- Stalactite drip tips -->
+          <line x1="99" y1="42" x2="99" y2="51" stroke="#2e220e" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+          <line x1="148" y1="52" x2="148" y2="61" stroke="#2e220e" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+          <line x1="190" y1="57" x2="190" y2="66" stroke="#2e220e" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+          <!-- Warm cave glow -->
+          <ellipse cx="170" cy="210" rx="130" ry="105" fill="url(#caveGlow)"/>
+          <!-- Cave floor -->
+          <path d="M0 274 Q52 267 104 271 Q148 275 170 269 Q192 263 236 269 Q282 274 340 267 L340 300 L0 300Z" fill="#1a1208"/>
+          <!-- Floor rocks -->
+          <ellipse cx="54" cy="283" rx="19" ry="9" fill="#211809" opacity="0.8"/>
+          <ellipse cx="291" cy="280" rx="21" ry="10" fill="#1d1507" opacity="0.8"/>
+          <ellipse cx="94" cy="287" rx="11" ry="6" fill="#261c0a" opacity="0.7"/>
+          <ellipse cx="252" cy="284" rx="14" ry="7" fill="#211809" opacity="0.7"/>
+          <!-- Stream -->
+          <path d="M0 291 Q42 281 72 288 Q102 295 132 284 Q156 275 170 281 Q184 288 212 279 Q242 269 272 277 Q302 285 340 276 L340 300 L0 300Z" fill="#1a3d6a" opacity="0.68"/>
+          <!-- Stream shimmer -->
+          <path d="M18 287 Q54 279 82 285 Q112 292 132 282" fill="none" stroke="#5b9bd4" stroke-width="1.3" stroke-linecap="round" opacity="0.48"/>
+          <path d="M178 278 Q208 271 238 276 Q266 281 298 273" fill="none" stroke="#5b9bd4" stroke-width="1.3" stroke-linecap="round" opacity="0.48"/>
+          <!-- Dragon PNG -->
+          <g id="dragon-body" style="animation:dragon-float 4s ease-in-out infinite">
+            <image href="baby-dragon.png" x="58" y="38" width="224" height="238" preserveAspectRatio="xMidYMid meet"/>
+          </g>
+          <!-- Head rendered by JS (hidden — PNG dragon used instead) -->
+          <g id="dragon-head" style="display:none"></g>
+          <!-- Fire breath (positioned at dragon mouth ~170,128) -->
+          <g id="fire-breath" opacity="0">
+            <ellipse cx="170" cy="128" rx="7" ry="10" fill="#fbbf24" opacity="0.95"/>
+            <ellipse cx="168" cy="142" rx="9" ry="11" fill="#f97316" opacity="0.8"/>
+            <ellipse cx="171" cy="155" rx="7" ry="9" fill="#ef4444" opacity="0.6"/>
+          </g>
+        </svg>
+      </div>
+      <div class="dragon-name-display" id="dragon-name-display">Blaze<span>Your dragon companion</span></div>
+      <div class="mood-bar-wrap">
+        <div class="mood-label"><span>Mood</span><span id="mood-text">Happy</span></div>
+        <div class="mood-bar"><div class="mood-fill" id="mood-fill" style="width:75%"></div></div>
+      </div>
+    </div>
+
+    <!-- Timer -->
+    <div class="panel">
+      <div class="panel-title">Focus Timer</div>
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="setMode('focus',this)">Focus</button>
+        <button class="mode-tab" onclick="setMode('short',this)">Short Break</button>
+        <button class="mode-tab" onclick="setMode('long',this)">Long Break</button>
+      </div>
+      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-presets">
+        <button class="preset-btn active" onclick="setPreset(25,this)">25 min</button>
+        <button class="preset-btn" onclick="setPreset(45,this)">45 min</button>
+        <button class="preset-btn" onclick="setPreset(60,this)">60 min</button>
+        <button class="preset-btn" onclick="setPreset(90,this)">90 min</button>
+      </div>
+      <div class="custom-time">
+        <label>Custom:</label>
+        <input type="number" id="custom-mins" placeholder="min" min="1" max="240" onchange="setCustomTime(this.value)"/>
+        <label>mins</label>
+      </div>
+      <div class="timer-controls">
+        <button class="btn btn-primary" id="start-btn" onclick="toggleTimer()">Begin Quest</button>
+        <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+      </div>
+      <div class="sep"></div>
+      <div class="timer-meta">
+        <div class="progress-ring-wrap">
+          <svg width="44" height="44" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="4"/>
+            <circle id="progress-ring" cx="24" cy="24" r="20" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="125.6" stroke-dashoffset="125.6" stroke-linecap="round"/>
+          </svg>
+          <div class="progress-text" id="progress-pct">0%</div>
+        </div>
+        <div class="sessions-count">Sessions: <strong id="sessions-done">0</strong> &nbsp;|&nbsp; Streak: <strong id="streak-count">0</strong></div>
+      </div>
+      <div class="status-strip"><span class="status-pill pill-idle" id="status-pill">Resting</span></div>
+    </div>
+
+    <!-- Goals -->
+    <div class="panel">
+      <div class="panel-title">Quest Goals</div>
+      <textarea class="goal-input" id="goal-input" placeholder="Enter a goal for this session..."></textarea>
+      <button class="btn-sm" style="width:100%;border-radius:10px;margin-bottom:12px" onclick="addGoal()">+ Add Goal</button>
+      <div id="goals-list"></div>
+      <div class="sep"></div>
+      <div class="section-label">Progress</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#4a7fa5">
+        <span>Goals completed</span>
+        <span><strong id="goals-done-count" style="color:#38bdf8">0</strong> / <span id="goals-total-count">0</span></span>
+      </div>
+    </div>
+
+    <!-- Reminders -->
+    <div class="panel" style="display:none">
+      <div class="panel-title">Dragon Reminders</div>
+      <div id="reminders-list">
+        <div class="reminder-card"><div class="reminder-icon">💧</div><div class="reminder-text"><strong>Stay Hydrated</strong>Dragon spotted an empty water bottle. Drink up!</div></div>
+        <div class="reminder-card"><div class="reminder-icon">🪑</div><div class="reminder-text"><strong>Posture Check</strong>Sit tall — shoulders back, feet flat, screen at eye level.</div></div>
+        <div class="reminder-card"><div class="reminder-icon">👁️</div><div class="reminder-text"><strong>Eye Rest</strong>20 feet, 20 seconds. Give those eyes a break.</div></div>
+      </div>
+    </div>
+
+
+  </div>
+  <div style="text-align:center;margin-top:24px">
+    <button onclick="resetSetup()" style="background:none;border:none;color:#2a4a62;font-size:11px;font-family:'Nunito',sans-serif;cursor:pointer;letter-spacing:1px;text-transform:uppercase;padding:4px 8px;transition:color .2s" onmouseover="this.style.color='#4a7fa5'" onmouseout="this.style.color='#2a4a62'">⚙ Redo Setup</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toast-icon">✨</div>
+  <div class="toast-text"><strong id="toast-title">Dragon says...</strong><span id="toast-msg"></span></div>
+</div>
+
+<script>
+const S={name:'Blaze',userName:'',personality:'guardian',accent:'#38bdf8',accentMuted:'rgba(56,189,248,.18)',eyeColor:'#60a5fa',timerSecs:1500,totalSecs:1500,running:false,interval:null,sessions:0,streak:0,mood:75,goals:[],lastReminder:0,reminderIdx:0,petCount:0};
+
+/* ── Dragon name ───────────────────────────────────────────── */
+function nameDragon(){const v=document.getElementById('dragon-name-input').value.trim();if(!v)return;S.name=v;document.getElementById('dragon-name-display').innerHTML=v+'<span>Your dragon companion</span>';document.getElementById('dragon-name-input').value='';toast('🐉','Named!','Your dragon is now '+v+'!')}
+
+/* ── Input sanitisation ────────────────────────────────────── */
+function sanitise(str){
+  return str.replace(/[<>"'`&]/g,'').substring(0,100);
+}
+
+/* ── Setup screen helpers ──────────────────────────────────── */
+function selectPersonality(el){
+  document.querySelectorAll('.personality-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+function selectAccent(el){
+  document.querySelectorAll('.accent-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  applyAccent(el.dataset.accent,el.dataset.muted);
+}
+function selectEyeColor(el){
+  document.querySelectorAll('.eye-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  applyEyeColor(el.dataset.eye);
+}
+function applyEyeColor(hex){
+  S.eyeColor=hex;
+  document.getElementById('eye-glow').style.background=hex;
+  const se=document.getElementById('setup-eye-glow');
+  if(se)se.style.background=hex;
+}
+function applyAccent(hex,muted){
+  document.documentElement.style.setProperty('--accent',hex);
+  document.documentElement.style.setProperty('--accent-muted',muted);
+  document.getElementById('dragon-glow').style.background=hex;
+  document.getElementById('progress-ring').setAttribute('stroke',hex);
+  S.accent=hex;S.accentMuted=muted;
+}
+function applySettings(data){
+  S.userName=data.userName||'';
+  S.name=data.dragonName||'Blaze';
+  S.personality=data.personality||'guardian';
+  applyAccent(data.accent||'#38bdf8',data.accentMuted||'rgba(56,189,248,.18)');
+  applyEyeColor(data.eyeColor||'#60a5fa');
+  const nd=document.getElementById('dragon-name-display');
+  nd.textContent='';
+  nd.appendChild(document.createTextNode(S.name));
+  const sub=document.createElement('span');sub.textContent='Your dragon companion';
+  nd.appendChild(sub);
+}
+function resetSetup(){
+  if(!confirm('Reset your dragon setup? Your current session progress will be lost.'))return;
+  localStorage.removeItem('dfSetup');
+  location.reload();
+}
+function completeSetup(){
+  const dragonName=sanitise(document.getElementById('setup-dragon-name').value.trim())||'Blaze';
+  const userName=sanitise(document.getElementById('setup-user-name').value.trim());
+  const personality=document.querySelector('.personality-card.active').dataset.personality;
+  const accentEl=document.querySelector('.accent-swatch.active');
+  const accent=accentEl?accentEl.dataset.accent:'#38bdf8';
+  const accentMuted=accentEl?accentEl.dataset.muted:'rgba(56,189,248,.18)';
+  const eyeEl=document.querySelector('.eye-swatch.active');
+  const eyeColor=eyeEl?eyeEl.dataset.eye:'#60a5fa';
+  const data={userName,dragonName,personality,accent,accentMuted,eyeColor};
+  localStorage.setItem('dfSetup',JSON.stringify(data));
+  applySettings(data);
+  const overlay=document.getElementById('setup-overlay');
+  overlay.classList.add('closing');
+  setTimeout(()=>{
+    overlay.style.display='none';
+    document.getElementById('app-main').style.display='';
+    const greeting=userName?'Welcome, '+userName+'! I am '+S.name+'. Let\'s do this!':'I am '+S.name+'! Ready to keep you focused!';
+    setSpeech(greeting);
+    toast('🐉','Quest begins!',greeting);
+  },400);
+}
+
+/* ── Reminders & sayings ───────────────────────────────────── */
+const reminders=[
+  {icon:'💧',title:'Stay Hydrated',msg:'Remember to stay hydrated — your dragon demands it!'},
+  {icon:'🪑',title:'Posture Check',msg:'Sit tall — shoulders back, feet flat, screen at eye level.'},
+  {icon:'👁️',title:'Eye Rest',msg:'Look 20 feet away for 20 seconds.'},
+  {icon:'🧘',title:'Deep Breath',msg:'Inhale 4, hold 4, exhale 6.'},
+  {icon:'🤸',title:'Quick Stretch',msg:'Roll your shoulders and tilt your neck.'},
+  {icon:'🍎',title:'Snack Time?',msg:'A healthy snack keeps the focus flame burning.'},
+  {icon:'🌿',title:'Look Outside',msg:'Gaze at something green or far away.'},
+  {icon:'🚶',title:'Tiny Movement',msg:'Stand up and take 10 steps.'},
+  {icon:'🤲',title:'Wrist Check',msg:'Shake out wrists and flex fingers.'},
+  {icon:'🧠',title:'Mind Reset',msg:'Close your eyes for 30 seconds.'}
+];
+const personalitySayings={
+  guardian:[
+    'I\'ve got your back! Stay strong!',
+    'You\'re capable of more than you know!',
+    'Every second of focus makes you stronger!',
+    'Proud of you. Now keep going!',
+    'Nothing gets past me — or you!',
+    'A guardian never abandons their post. Neither will you.',
+    'Obstacles are just enemies we haven\'t defeated yet.',
+    'You showed up. That\'s already half the battle.',
+    'I believe in you more than you know.',
+    'Stay the course. Every minute counts.',
+    'The strongest warriors focus first, celebrate later.',
+    'You\'ve got this. I\'ll make sure of it.'
+  ],
+  scholar:[
+    'Knowledge is power — keep learning!',
+    'Every focused session is a step toward mastery!',
+    'Curiosity + focus = brilliance.',
+    'Document your thoughts; future you will thank you.',
+    'A scholar never wastes a minute.',
+    'The mind sharpens with every session. Keep going.',
+    'Slow and steady builds the deepest understanding.',
+    'Great ideas are born in quiet, focused moments.',
+    'What you learn today becomes wisdom tomorrow.',
+    'Even the greatest scholars started with a blank page.',
+    'Cross-reference your thoughts. Question your assumptions.',
+    'Mastery is just focused repetition over time.'
+  ],
+  trickster:[
+    'Bet you can\'t finish this session! 😏',
+    'Ooh, look at you being all productive!',
+    'I\'d distract you, but you\'re too focused!',
+    'Still here? Impressive. I underestimated you.',
+    'Fine, fine — you win this round.',
+    'I was going to cause chaos... but you\'re actually working.',
+    'Don\'t look now, but you\'re kind of crushing it. 😏',
+    'Shh. Don\'t tell the other dragons you\'re this good.',
+    'I set a trap for procrastination. You avoided it. Well played.',
+    'Plot twist: you\'re more productive than I expected.',
+    'I\'m impressed. Annoyingly so.',
+    'Go on then, prove me wrong again. I dare you.'
+  ],
+  sage:[
+    'The present moment is where great work happens.',
+    'Breathe. Focus. Achieve.',
+    'Stillness of mind, clarity of purpose.',
+    'Each breath, each keystroke — intentional.',
+    'The journey of a thousand sessions begins with one.',
+    'What you tend to grows. Tend to your focus.',
+    'Do not rush. Deep work cannot be hurried.',
+    'The tree does not strain to grow. It simply grows.',
+    'Where attention goes, energy flows.',
+    'Let go of the last hour. This moment is all there is.',
+    'Progress lives in the space between distraction and effort.',
+    'A clear mind and a steady hand — that is enough.'
+  ]
+};
+
+/* ── Stars background ──────────────────────────────────────── */
+function createStars(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<80;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()*2.2+0.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*5}s;animation-delay:${Math.random()*5}s`;
+    c.appendChild(s);
+  }
+}
+
+/* ── Timer ─────────────────────────────────────────────────── */
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function updateDisp(){
+  document.getElementById('timer-display').textContent=fmt(S.timerSecs);
+  const p=Math.round((1-S.timerSecs/S.totalSecs)*100);
+  document.getElementById('progress-pct').textContent=p+'%';
+  document.getElementById('progress-ring').style.strokeDashoffset=125.6-(p/100)*125.6;
+}
+function toggleTimer(){S.running?pause():start()}
+function start(){
+  if(!S.timerSecs)return;
+  S.running=true;
+  document.getElementById('start-btn').textContent='Pause';
+  document.getElementById('timer-display').classList.add('active');
+  setPill('On Quest','pill-active');
+  setSpeech(S.name+' is watching over you! Stay focused!');
+  S.interval=setInterval(tick,1000);
+  S.lastReminder=Date.now();
+}
+function pause(){
+  S.running=false;clearInterval(S.interval);
+  document.getElementById('start-btn').textContent='Resume';
+  document.getElementById('timer-display').classList.remove('active');
+  setPill('Paused','pill-idle');
+  setSpeech('Paused! Don\'t be gone long!');
+}
+function resetTimer(){
+  clearInterval(S.interval);S.running=false;S.timerSecs=S.totalSecs;
+  document.getElementById('start-btn').textContent='Begin Quest';
+  document.getElementById('timer-display').classList.remove('active');
+  setPill('Resting','pill-idle');
+  updateDisp();setSpeech('Ready for a new quest! I believe in you!');mood(75);
+}
+function tick(){
+  S.timerSecs--;updateDisp();
+  const p=(S.totalSecs-S.timerSecs)/S.totalSecs;
+  mood(Math.min(100,50+Math.round(p*50)));
+  if(Date.now()-S.lastReminder>300000&&S.running){triggerReminder();S.lastReminder=Date.now()}
+  if(S.timerSecs>0&&S.timerSecs%600===0){const ps=personalitySayings[S.personality];setSpeech(ps[Math.floor(Math.random()*ps.length)]);}
+  if(S.timerSecs<=0)complete();
+}
+function complete(){
+  clearInterval(S.interval);S.running=false;S.sessions++;S.streak++;
+  document.getElementById('sessions-done').textContent=S.sessions;
+  document.getElementById('streak-count').textContent=S.streak;
+  document.getElementById('start-btn').textContent='Begin Quest';
+  document.getElementById('timer-display').classList.remove('active');
+  setPill('Quest Complete!','pill-done');mood(100);
+  setSpeech('QUEST COMPLETE! '+S.name+' is SO proud of you!');
+  toast('🏆','Session Complete!','Amazing! '+S.sessions+' session'+(S.sessions>1?'s':'')+' done!');
+  const f=document.getElementById('fire-breath');
+  f.style.transition='opacity .3s';f.style.opacity='1';
+  setTimeout(()=>f.style.opacity='0',2200);
+}
+function setPreset(m,el){
+  if(S.running)return;
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');S.totalSecs=m*60;S.timerSecs=m*60;updateDisp();
+}
+function setCustomTime(v){
+  const m=parseInt(v);
+  if(!m||m<1||m>240)return;
+  S.totalSecs=m*60;S.timerSecs=m*60;
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  updateDisp();
+}
+function setMode(mode,el){
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');clearInterval(S.interval);S.running=false;
+  document.getElementById('start-btn').textContent='Begin Quest';
+  document.getElementById('timer-display').classList.remove('active');
+  const m=mode==='focus'?25:mode==='short'?5:15;
+  S.totalSecs=m*60;S.timerSecs=m*60;updateDisp();
+  const msg={focus:'Focus mode! Let\'s go!',short:'Short break — stretch and breathe!',long:'Long break earned. Well done!'};
+  setSpeech(msg[mode]);
+}
+
+/* ── Reminders ─────────────────────────────────────────────── */
+function triggerReminder(){
+  if(S.running)return;
+  const r=reminders[S.reminderIdx%reminders.length];S.reminderIdx++;
+  const card=document.createElement('div');
+  card.className='reminder-card new-reminder';
+  card.innerHTML=`<div class="reminder-icon">${r.icon}</div><div class="reminder-text"><strong>${r.title}</strong>${r.msg}</div>`;
+  const list=document.getElementById('reminders-list');
+  list.insertBefore(card,list.firstChild);
+  if(list.children.length>5)list.removeChild(list.lastChild);
+  toast(r.icon,r.title,r.msg);
+  setSpeech(r.icon+' '+r.msg.substring(0,60));
+  if(Notification.permission==='granted'){
+    new Notification(r.icon+' '+r.title+' — '+S.name+' says:', {body:r.msg, icon:'baby-dragon.png'});
+  }
+}
+
+/* ── Goals ─────────────────────────────────────────────────── */
+function addGoal(){
+  const inp=document.getElementById('goal-input');
+  const t=sanitise(inp.value.trim());if(!t)return;
+  S.goals.push({text:t,done:false});inp.value='';renderGoals();
+  setSpeech('New goal added! '+S.name+' will help you smash it!');
+}
+function toggleGoal(i){
+  S.goals[i].done=!S.goals[i].done;renderGoals();
+  if(S.goals[i].done){
+    toast('⚔️','Goal Complete!','"'+S.goals[i].text.substring(0,40)+'"');
+    setSpeech('YES! Goal crushed!');mood(Math.min(100,S.mood+12));
+  }
+}
+function renderGoals(){
+  const list=document.getElementById('goals-list');list.innerHTML='';
+  S.goals.forEach((g,i)=>{
+    const el=document.createElement('div');
+    el.className='goal-item'+(g.done?' done':'');
+    el.onclick=()=>toggleGoal(i);
+    const check=document.createElement('div');check.className='goal-check';
+    const span=document.createElement('span');span.textContent=g.text;
+    el.appendChild(check);el.appendChild(span);
+    list.appendChild(el);
+  });
+  document.getElementById('goals-done-count').textContent=S.goals.filter(g=>g.done).length;
+  document.getElementById('goals-total-count').textContent=S.goals.length;
+}
+
+/* ── Dragon interaction ────────────────────────────────────── */
+function petDragon(){
+  S.petCount++;
+  const petSayings={
+    guardian:[
+      'Purrrr... '+S.name+' loves attention!',
+      '*happy dragon wiggles*',
+      S.name+' nuzzles your hand! Now back to work!',
+      'Stop distracting me — I\'m guarding YOUR focus!',
+      'Pet received. Returning to watch duty.',
+      'Okay, that was nice. Don\'t make it a habit.',
+      '*tail wag* Morale boosted. Resume mission.',
+      'I protect you. You pet me. Fair trade.',
+      'Feeling the love. Now let\'s earn it.',
+      'That recharge was approved. Back to it!'
+    ],
+    scholar:[
+      'Hmm, a distraction. Noted. Back to work!',
+      '*adjusts tiny glasses* Yes yes, very nice.',
+      'Affection acknowledged. Resume studying!',
+      'Pet count: '+(S.petCount)+'. Now focus!',
+      'Your dedication to petting me is admirable... but misplaced.',
+      'Tactile feedback received. Logging it as a break.',
+      'Okay okay, break taken. Now where were we?',
+      'Honestly? Same. I needed that too.',
+      '*makes note* Subject is easily distracted by cute dragon.',
+      'Fine. One pet = one more focused minute. Deal?'
+    ],
+    trickster:[
+      'Ha! Caught you slacking! 😏',
+      '*pretends not to enjoy it* ...okay maybe a little.',
+      'You think pets will distract me? You\'re right.',
+      'Fine, I like it. Don\'t tell anyone.',
+      'Bribed with pets. Classic.',
+      'Ugh, fine. That was adorable. Don\'t do it again.',
+      'You\'ve unlocked: Dragon Approval. Use it wisely.',
+      'I was plotting chaos, but this is better.',
+      'Pet #'+S.petCount+'? You\'re obsessed. I love it.',
+      '*secretly smug* You\'re MY human, clearly.'
+    ],
+    sage:[
+      'A moment of connection. Cherish it, then return.',
+      '*breathes slowly* All is well. Now, the work.',
+      'Kindness given, kindness received. Balance restored.',
+      'The dragon is pleased. The work awaits.',
+      'Touch the stillness. Then dive back in.',
+      'In giving warmth, you receive it. Now focus.',
+      'Pause taken. Breath drawn. Return, renewed.',
+      'This too is part of the practice.',
+      'Presence acknowledged. Presence returned.',
+      'A gentle moment, then onward with intention.'
+    ]
+  };
+  const p=petSayings[S.personality];
+  setSpeech(p[S.petCount%p.length]);mood(Math.min(100,S.mood+6));
+}
+function mood(v){
+  S.mood=v;document.getElementById('mood-fill').style.width=v+'%';
+  const l=v>=92?'Ecstatic!':v>=75?'Happy':v>=55?'Content':v>=35?'Impatient':'Restless';
+  document.getElementById('mood-text').textContent=l;
+}
+function setSpeech(t){
+  const el=document.getElementById('speech');el.style.opacity='0';
+  setTimeout(()=>{el.textContent=t;el.style.opacity='1'},180);
+}
+function setPill(t,cls){
+  const p=document.getElementById('status-pill');p.textContent=t;p.className='status-pill '+cls;
+}
+
+/* ── Toast ─────────────────────────────────────────────────── */
+let toastT=null;
+function toast(icon,title,msg){
+  clearTimeout(toastT);
+  document.getElementById('toast-icon').textContent=icon;
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast').classList.add('show');
+  toastT=setTimeout(()=>document.getElementById('toast').classList.remove('show'),4200);
+}
+
+/* ── Service Worker ────────────────────────────────────────── */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js');
+}
+
+/* ── Init ──────────────────────────────────────────────────── */
+if('Notification' in window && Notification.permission==='default'){
+  Notification.requestPermission();
+}
+createStars();
+updateDisp();
+const _saved=JSON.parse(localStorage.getItem('dfSetup')||'null');
+if(_saved){
+  applySettings(_saved);
+  document.getElementById('setup-overlay').style.display='none';
+}else{
+  document.getElementById('app-main').style.display='none';
+}
+setTimeout(()=>triggerReminder(),8000);
+</script>
+</body>
+</html>
