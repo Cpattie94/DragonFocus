@@ -90,10 +90,19 @@
   .goal-item.done .goal-check::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;color:white}
   .btn-sm{padding:8px 14px;border-radius:11px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;background:rgba(56,189,248,.2);color:#38bdf8;transition:all .2s}
   .btn-sm:hover{background:rgba(56,189,248,.4)}
+  .xp-bar-wrap{width:100%;max-width:240px;margin-top:10px}
+  .xp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f97316,#fbbf24);transition:width .8s ease}
+  .flame-rank{font-size:12px;font-weight:700;letter-spacing:.5px}
+  .rank-ember{color:#fb923c}
+  .rank-torch{color:#fbbf24}
+  .rank-bonfire{color:#f97316}
+  .rank-inferno{color:#ef4444}
 
   .name-input-row{display:flex;gap:8px}
-  .name-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(100,180,255,0.12);border-radius:11px;padding:9px 13px;font-size:13px;color:#dde8ff;font-family:'Nunito',sans-serif}
+  .name-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(100,180,255,0.12);border-radius:11px;padding:9px 13px;font-size:13px;color:#dde8ff;font-family:'Nunito',sans-serif;transition:border-color .2s}
   .name-input:focus{outline:none;border-color:#38bdf8}
+  .name-input.input-error{border-color:#f43f5e;animation:input-shake .3s ease}
+  @keyframes input-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
   .toast{position:fixed;bottom:24px;right:20px;background:rgba(6,18,36,.97);border:1px solid rgba(56,189,248,.28);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;max-width:300px;z-index:1000;transform:translateX(380px);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
   .toast.show{transform:translateX(0)}
   .toast-icon{font-size:20px}
@@ -129,9 +138,9 @@
   .eye-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;position:relative}
   .eye-swatch.active{border-color:white;transform:scale(1.18)}
   .eye-swatch.active::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;color:white;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.5)}
-  .eye-glow{position:absolute;left:50%;top:37%;transform:translateX(-50%);width:72px;height:28px;border-radius:50%;opacity:.55;mix-blend-mode:screen;pointer-events:none;transition:background .3s,box-shadow .3s;filter:blur(6px)}
+  .eye-glow{position:absolute;left:50%;top:37%;transform:translateX(-50%);width:80px;height:32px;border-radius:50%;opacity:.75;mix-blend-mode:screen;pointer-events:none;transition:background .3s,box-shadow .3s;filter:blur(7px)}
   .setup-dragon-preview{text-align:center;position:relative;display:inline-block;width:100%}
-  .setup-eye-glow{position:absolute;left:50%;top:36%;transform:translateX(-50%);width:38px;height:15px;border-radius:50%;opacity:.6;mix-blend-mode:screen;pointer-events:none;transition:background .3s;filter:blur(4px)}
+  .setup-eye-glow{position:absolute;left:50%;top:36%;transform:translateX(-50%);width:44px;height:18px;border-radius:50%;opacity:.75;mix-blend-mode:screen;pointer-events:none;transition:background .3s;filter:blur(5px)}
 </style>
 </head>
 <body>
@@ -146,7 +155,7 @@
       <p>Let's get your dragon ready before we begin.</p>
     </div>
     <div class="setup-dragon-preview">
-      <img src="baby-dragon.png" alt="Your dragon"/>
+      <img id="setup-dragon-img" src="baby-dragon.png" alt="Your dragon"/>
       <div class="setup-eye-glow" id="setup-eye-glow" style="background:#60a5fa"></div>
     </div>
     <div class="setup-field">
@@ -185,11 +194,11 @@
     <div class="setup-field">
       <label>Accent Colour</label>
       <div class="accent-swatches">
-        <div class="accent-swatch active" data-accent="#38bdf8" data-muted="rgba(56,189,248,.18)" style="background:#38bdf8" title="Azure" onclick="selectAccent(this)"></div>
-        <div class="accent-swatch" data-accent="#a855f7" data-muted="rgba(168,85,247,.18)" style="background:#a855f7" title="Amethyst" onclick="selectAccent(this)"></div>
-        <div class="accent-swatch" data-accent="#10b981" data-muted="rgba(16,185,129,.18)" style="background:#10b981" title="Jade" onclick="selectAccent(this)"></div>
-        <div class="accent-swatch" data-accent="#f43f5e" data-muted="rgba(244,63,94,.18)" style="background:#f43f5e" title="Crimson" onclick="selectAccent(this)"></div>
-        <div class="accent-swatch" data-accent="#f59e0b" data-muted="rgba(245,158,11,.18)" style="background:#f59e0b" title="Ember" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch active" data-accent="#38bdf8" data-muted="rgba(56,189,248,.18)" data-hue="160" style="background:#38bdf8" title="Azure" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#a855f7" data-muted="rgba(168,85,247,.18)" data-hue="233" style="background:#a855f7" title="Amethyst" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#10b981" data-muted="rgba(16,185,129,.18)" data-hue="122" style="background:#10b981" title="Jade" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#f43f5e" data-muted="rgba(244,63,94,.18)" data-hue="312" style="background:#f43f5e" title="Crimson" onclick="selectAccent(this)"></div>
+        <div class="accent-swatch" data-accent="#f59e0b" data-muted="rgba(245,158,11,.18)" data-hue="0" style="background:#f59e0b" title="Ember" onclick="selectAccent(this)"></div>
       </div>
     </div>
     <div class="setup-field">
@@ -288,6 +297,17 @@
         <div class="mood-label"><span>Mood</span><span id="mood-text">Happy</span></div>
         <div class="mood-bar"><div class="mood-fill" id="mood-fill" style="width:75%"></div></div>
       </div>
+      <div class="xp-bar-wrap">
+        <div class="mood-label">
+          <span class="flame-rank rank-ember" id="xp-rank-label">🔥 Ember</span>
+          <span id="xp-level-text">Lv.1 · 0 XP</span>
+        </div>
+        <div class="mood-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+        <div class="mood-label" style="margin-top:5px">
+          <span style="font-size:11px;color:#4a7fa5">Day streak: <strong id="daily-streak-count" style="color:#f97316">1</strong></span>
+          <span style="font-size:11px;color:#4a7fa5" id="xp-multiplier-text">×1.0 XP</span>
+        </div>
+      </div>
     </div>
 
     <!-- Timer -->
@@ -298,12 +318,11 @@
         <button class="mode-tab" onclick="setMode('short',this)">Short Break</button>
         <button class="mode-tab" onclick="setMode('long',this)">Long Break</button>
       </div>
-      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-display" id="timer-display">10:00</div>
       <div class="timer-presets">
-        <button class="preset-btn active" onclick="setPreset(25,this)">25 min</button>
-        <button class="preset-btn" onclick="setPreset(45,this)">45 min</button>
+        <button class="preset-btn active" onclick="setPreset(10,this)">10 min</button>
+        <button class="preset-btn" onclick="setPreset(30,this)">30 min</button>
         <button class="preset-btn" onclick="setPreset(60,this)">60 min</button>
-        <button class="preset-btn" onclick="setPreset(90,this)">90 min</button>
       </div>
       <div class="custom-time">
         <label>Custom:</label>
@@ -365,7 +384,7 @@
 </div>
 
 <script>
-const S={name:'Blaze',userName:'',personality:'guardian',accent:'#38bdf8',accentMuted:'rgba(56,189,248,.18)',eyeColor:'#60a5fa',timerSecs:1500,totalSecs:1500,running:false,interval:null,sessions:0,streak:0,mood:75,goals:[],lastReminder:0,reminderIdx:0,petCount:0};
+const S={name:'Blaze',userName:'',personality:'guardian',accent:'#38bdf8',accentMuted:'rgba(56,189,248,.18)',eyeColor:'#60a5fa',dragonHue:0,timerSecs:600,totalSecs:600,running:false,interval:null,sessions:0,streak:0,mood:75,goals:[],lastReminder:0,reminderIdx:0,petCount:0,startedAt:0,secsAtStart:0,xp:0,xpLevel:1,dailyStreak:1};
 
 /* ── Dragon name ───────────────────────────────────────────── */
 function nameDragon(){const v=document.getElementById('dragon-name-input').value.trim();if(!v)return;S.name=v;document.getElementById('dragon-name-display').innerHTML=v+'<span>Your dragon companion</span>';document.getElementById('dragon-name-input').value='';toast('🐉','Named!','Your dragon is now '+v+'!')}
@@ -383,7 +402,7 @@ function selectPersonality(el){
 function selectAccent(el){
   document.querySelectorAll('.accent-swatch').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
-  applyAccent(el.dataset.accent,el.dataset.muted);
+  applyAccent(el.dataset.accent,el.dataset.muted,Number(el.dataset.hue||0));
 }
 function selectEyeColor(el){
   document.querySelectorAll('.eye-swatch').forEach(s=>s.classList.remove('active'));
@@ -396,18 +415,23 @@ function applyEyeColor(hex){
   const se=document.getElementById('setup-eye-glow');
   if(se)se.style.background=hex;
 }
-function applyAccent(hex,muted){
+function applyAccent(hex,muted,hue=0){
   document.documentElement.style.setProperty('--accent',hex);
   document.documentElement.style.setProperty('--accent-muted',muted);
   document.getElementById('dragon-glow').style.background=hex;
   document.getElementById('progress-ring').setAttribute('stroke',hex);
-  S.accent=hex;S.accentMuted=muted;
+  S.accent=hex;S.accentMuted=muted;S.dragonHue=hue;
+  const hf=`grayscale(1) sepia(1) saturate(3) hue-rotate(${hue}deg)`;
+  const dbImg=document.querySelector('#dragon-body image');
+  if(dbImg)dbImg.style.filter=hf;
+  const si=document.getElementById('setup-dragon-img');
+  if(si)si.style.filter=`${hf} drop-shadow(0 6px 18px ${hex})`;
 }
 function applySettings(data){
   S.userName=data.userName||'';
   S.name=data.dragonName||'Blaze';
   S.personality=data.personality||'guardian';
-  applyAccent(data.accent||'#38bdf8',data.accentMuted||'rgba(56,189,248,.18)');
+  applyAccent(data.accent||'#38bdf8',data.accentMuted||'rgba(56,189,248,.18)',data.dragonHue||0);
   applyEyeColor(data.eyeColor||'#60a5fa');
   const nd=document.getElementById('dragon-name-display');
   nd.textContent='';
@@ -421,15 +445,26 @@ function resetSetup(){
   location.reload();
 }
 function completeSetup(){
-  const dragonName=sanitise(document.getElementById('setup-dragon-name').value.trim())||'Blaze';
-  const userName=sanitise(document.getElementById('setup-user-name').value.trim());
+  const userEl=document.getElementById('setup-user-name');
+  const dragonEl=document.getElementById('setup-dragon-name');
+  const userName=sanitise(userEl.value.trim());
+  const dragonName=sanitise(dragonEl.value.trim());
+  let invalid=false;
+  [userEl,dragonEl].forEach(el=>{
+    el.classList.remove('input-error');
+    if(!sanitise(el.value.trim())){el.classList.add('input-error');el.addEventListener('animationend',()=>el.classList.remove('input-error'),{once:true});invalid=true;}
+  });
+  if(invalid)return;
+  const dragonNameFinal=dragonName||'Blaze';
+  const userNameFinal=userName;
   const personality=document.querySelector('.personality-card.active').dataset.personality;
   const accentEl=document.querySelector('.accent-swatch.active');
   const accent=accentEl?accentEl.dataset.accent:'#38bdf8';
   const accentMuted=accentEl?accentEl.dataset.muted:'rgba(56,189,248,.18)';
+  const dragonHue=accentEl?Number(accentEl.dataset.hue||0):0;
   const eyeEl=document.querySelector('.eye-swatch.active');
   const eyeColor=eyeEl?eyeEl.dataset.eye:'#60a5fa';
-  const data={userName,dragonName,personality,accent,accentMuted,eyeColor};
+  const data={userName:userNameFinal,dragonName:dragonNameFinal,personality,accent,accentMuted,dragonHue,eyeColor};
   localStorage.setItem('dfSetup',JSON.stringify(data));
   applySettings(data);
   const overlay=document.getElementById('setup-overlay');
@@ -440,6 +475,7 @@ function completeSetup(){
     const greeting=userName?'Welcome, '+userName+'! I am '+S.name+'. Let\'s do this!':'I am '+S.name+'! Ready to keep you focused!';
     setSpeech(greeting);
     toast('🐉','Quest begins!',greeting);
+    setTimeout(()=>triggerReminder(),8000);
   },400);
 }
 
@@ -543,6 +579,8 @@ function start(){
   document.getElementById('timer-display').classList.add('active');
   setPill('On Quest','pill-active');
   setSpeech(S.name+' is watching over you! Stay focused!');
+  S.startedAt=Date.now();
+  S.secsAtStart=S.timerSecs;
   S.interval=setInterval(tick,1000);
   S.lastReminder=Date.now();
 }
@@ -561,13 +599,16 @@ function resetTimer(){
   updateDisp();setSpeech('Ready for a new quest! I believe in you!');mood(75);
 }
 function tick(){
-  S.timerSecs--;updateDisp();
+  const elapsed=Math.floor((Date.now()-S.startedAt)/1000);
+  S.timerSecs=Math.max(0,S.secsAtStart-elapsed);
+  updateDisp();
   const p=(S.totalSecs-S.timerSecs)/S.totalSecs;
   mood(Math.min(100,50+Math.round(p*50)));
   if(Date.now()-S.lastReminder>300000&&S.running){triggerReminder();S.lastReminder=Date.now()}
   if(S.timerSecs>0&&S.timerSecs%600===0){const ps=personalitySayings[S.personality];setSpeech(ps[Math.floor(Math.random()*ps.length)]);}
   if(S.timerSecs<=0)complete();
 }
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.running)tick();});
 function complete(){
   clearInterval(S.interval);S.running=false;S.sessions++;S.streak++;
   document.getElementById('sessions-done').textContent=S.sessions;
@@ -576,7 +617,9 @@ function complete(){
   document.getElementById('timer-display').classList.remove('active');
   setPill('Quest Complete!','pill-done');mood(100);
   setSpeech('QUEST COMPLETE! '+S.name+' is SO proud of you!');
-  toast('🏆','Session Complete!','Amazing! '+S.sessions+' session'+(S.sessions>1?'s':'')+' done!');
+  const gained=addXP(50);
+  const rank=getFlameRank();
+  toast('🏆','Session Complete!','+'+gained+' XP ('+rank.icon+' '+rank.mult.toFixed(1)+'×) · '+S.sessions+' session'+(S.sessions>1?'s':'')+' done!');
   const f=document.getElementById('fire-breath');
   f.style.transition='opacity .3s';f.style.opacity='1';
   setTimeout(()=>f.style.opacity='0',2200);
@@ -598,7 +641,7 @@ function setMode(mode,el){
   el.classList.add('active');clearInterval(S.interval);S.running=false;
   document.getElementById('start-btn').textContent='Begin Quest';
   document.getElementById('timer-display').classList.remove('active');
-  const m=mode==='focus'?25:mode==='short'?5:15;
+  const m=mode==='focus'?10:mode==='short'?5:15;
   S.totalSecs=m*60;S.timerSecs=m*60;updateDisp();
   const msg={focus:'Focus mode! Let\'s go!',short:'Short break — stretch and breathe!',long:'Long break earned. Well done!'};
   setSpeech(msg[mode]);
@@ -711,6 +754,44 @@ function mood(v){
   const l=v>=92?'Ecstatic!':v>=75?'Happy':v>=55?'Content':v>=35?'Impatient':'Restless';
   document.getElementById('mood-text').textContent=l;
 }
+
+/* ── Flame rank & XP ───────────────────────────────────────── */
+const flameRanks=[
+  {min:1, max:2,  label:'Ember',   icon:'🔥',   cls:'rank-ember',   mult:1.0},
+  {min:3, max:6,  label:'Torch',   icon:'🕯️',   cls:'rank-torch',   mult:1.5},
+  {min:7, max:13, label:'Bonfire', icon:'🔥🔥', cls:'rank-bonfire', mult:2.0},
+  {min:14,max:Infinity,label:'Inferno',icon:'⚡🔥',cls:'rank-inferno',mult:3.0}
+];
+function getFlameRank(){
+  return flameRanks.find(r=>S.dailyStreak>=r.min&&S.dailyStreak<=r.max)||flameRanks[0];
+}
+function saveProgress(){
+  const today=new Date().toISOString().slice(0,10);
+  localStorage.setItem('dfProgress',JSON.stringify({xp:S.xp,dailyStreak:S.dailyStreak,lastVisit:today}));
+}
+function updateXPBar(){
+  const prog=S.xp%100;
+  const lvl=Math.floor(S.xp/100)+1;
+  S.xpLevel=lvl;
+  const rank=getFlameRank();
+  document.getElementById('xp-fill').style.width=prog+'%';
+  document.getElementById('xp-level-text').textContent='Lv.'+lvl+' · '+S.xp+' XP';
+  const rankEl=document.getElementById('xp-rank-label');
+  rankEl.textContent=rank.icon+' '+rank.label;
+  rankEl.className='flame-rank '+rank.cls;
+  document.getElementById('xp-multiplier-text').textContent='×'+rank.mult.toFixed(1)+' XP';
+  document.getElementById('daily-streak-count').textContent=S.dailyStreak;
+}
+function addXP(base){
+  const rank=getFlameRank();
+  const gained=Math.round(base*rank.mult);
+  const oldLvl=Math.floor(S.xp/100)+1;
+  S.xp+=gained;
+  const newLvl=Math.floor(S.xp/100)+1;
+  saveProgress();updateXPBar();
+  if(newLvl>oldLvl){setTimeout(()=>toast('⭐','Level Up!','Reached Lv.'+newLvl+'! '+S.name+' grows stronger!'),1500);}
+  return gained;
+}
 function setSpeech(t){
   const el=document.getElementById('speech');el.style.opacity='0';
   setTimeout(()=>{el.textContent=t;el.style.opacity='1'},180);
@@ -741,14 +822,30 @@ if('Notification' in window && Notification.permission==='default'){
 }
 createStars();
 updateDisp();
+(function loadProgress(){
+  const today=new Date().toISOString().slice(0,10);
+  const p=JSON.parse(localStorage.getItem('dfProgress')||'null');
+  if(p){
+    S.xp=p.xp||0;
+    const last=p.lastVisit||'';
+    if(last){
+      const diff=Math.round((new Date(today)-new Date(last))/86400000);
+      if(diff===0)S.dailyStreak=p.dailyStreak||1;
+      else if(diff===1){S.dailyStreak=(p.dailyStreak||1)+1;}
+      else S.dailyStreak=1;
+    } else {S.dailyStreak=p.dailyStreak||1;}
+  }
+  saveProgress();
+  updateXPBar();
+})();
 const _saved=JSON.parse(localStorage.getItem('dfSetup')||'null');
 if(_saved){
   applySettings(_saved);
   document.getElementById('setup-overlay').style.display='none';
+  setTimeout(()=>triggerReminder(),8000);
 }else{
   document.getElementById('app-main').style.display='none';
 }
-setTimeout(()=>triggerReminder(),8000);
 </script>
 </body>
 </html>
