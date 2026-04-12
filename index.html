@@ -475,8 +475,8 @@ function completeSetup(){
     const greeting=userName?'Welcome, '+userName+'! I am '+S.name+'. Let\'s do this!':'I am '+S.name+'! Ready to keep you focused!';
     setSpeech(greeting);
     toast('🐉','Quest begins!',greeting);
-    setTimeout(()=>triggerReminder(),8000);
     setTimeout(()=>triggerDailyFact(),10000);
+    setTimeout(()=>triggerReminder(),20000);
   },400);
 }
 
